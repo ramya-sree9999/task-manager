@@ -6,6 +6,8 @@ import './App.css';
 function App() {
   const [tasks, setTasks] = useState([]); // State to hold tasks
   const [filter, setFilter] = useState('All'); // State to manage filter (All, Completed, Pending)
+  const [priorityFilter, setPriorityFilter] = useState('All'); // Filter for priority (All, High, Medium, Low)
+  const [editingTask, setEditingTask] = useState(null); // State to handle the editing task
 
   // Load tasks from localStorage when the app initializes
   useEffect(() => {
@@ -25,6 +27,20 @@ function App() {
     setTasks([...tasks, task]);
   };
 
+  // Edit an existing task
+  const editTask = (task) => {
+    setEditingTask(task); // Set the task to be edited
+  };
+
+  // Update an edited task
+  const updateTask = (updatedTask) => {
+    const updatedTasks = tasks.map((task) =>
+      task === editingTask ? updatedTask : task
+    );
+    setTasks(updatedTasks);
+    setEditingTask(null); // Close the edit mode
+  };
+
   // Toggle task completion
   const toggleComplete = (index) => {
     const updatedTasks = tasks.map((task, i) =>
@@ -40,33 +56,54 @@ function App() {
   };
 
   // Filter tasks based on the selected filter
-  const filteredTasks = tasks.filter((task) =>
-    filter === 'All'
-      ? true
-      : filter === 'Completed'
-      ? task.completed
-      : !task.completed
-  );
+  const filteredTasks = tasks.filter((task) => {
+    // First apply the completion filter
+    const filterByCompletion =
+      filter === 'All'
+        ? true
+        : filter === 'Completed'
+        ? task.completed
+        : !task.completed;
+
+    // Then apply the priority filter
+    const filterByPriority =
+      priorityFilter === 'All' ? true : task.priority === priorityFilter;
+
+    return filterByCompletion && filterByPriority;
+  });
 
   return (
     <div>
       <h1>Task Manager</h1>
 
-      {/* Filter Buttons */}
+      {/* Filter Buttons for Completion */}
       <div>
         <button onClick={() => setFilter('All')}>All</button>
         <button onClick={() => setFilter('Completed')}>Completed</button>
         <button onClick={() => setFilter('Pending')}>Pending</button>
       </div>
 
+      {/* Filter Buttons for Priority */}
+      <div>
+        <button onClick={() => setPriorityFilter('All')}>All Priorities</button>
+        <button onClick={() => setPriorityFilter('High')}>High</button>
+        <button onClick={() => setPriorityFilter('Medium')}>Medium</button>
+        <button onClick={() => setPriorityFilter('Low')}>Low</button>
+      </div>
+
       {/* Task Form Component */}
-      <TaskForm addTask={addTask} />
+      <TaskForm
+        addTask={addTask}
+        updateTask={updateTask}
+        editingTask={editingTask}
+      />
 
       {/* Task List Component */}
       <TaskList
         tasks={filteredTasks} // Pass only filtered tasks
         toggleComplete={toggleComplete}
         deleteTask={deleteTask}
+        editTask={editTask} // Pass editTask function to TaskItem
       />
     </div>
   );

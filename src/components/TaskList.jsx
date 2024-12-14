@@ -2,7 +2,7 @@ import React from 'react';
 import TaskItem from './TaskItem';
 import '../App.css';
 
-function TaskList({ tasks, toggleComplete, deleteTask }) {
+function TaskList({ tasks, toggleComplete, deleteTask, editTask }) {
   return (
     <div>
       {tasks.map((task, index) => (
@@ -11,6 +11,7 @@ function TaskList({ tasks, toggleComplete, deleteTask }) {
           task={task}
           toggleComplete={() => toggleComplete(index)}
           deleteTask={() => deleteTask(index)}
+          editTask={() => editTask(task)} // Pass the edit function to TaskItem
         />
       ))}
     </div>
